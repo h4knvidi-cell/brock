@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MSN Brock — Market Simulation</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="loginView" class="login-view">
+  <div class="login-box">
+    <div class="logo"><span>MB</span> MSN <b>BROCK</b></div>
+    <p class="muted">Professional market & portfolio dashboard</p>
+    <label>Username<input id="username" autocomplete="username"></label>
+    <label>Client ID<input id="clientId"></label>
+    <label>Password<input id="password" type="password" autocomplete="current-password"></label>
+    <button class="primary" id="loginBtn">Login</button>
+    <p id="loginError" class="error"></p>
+    <small>Simulation environment. No real brokerage, bank, payment, or KYC verification is connected.</small>
+  </div>
+</div>
+
+<div id="appView" class="hidden">
+<header class="topbar">
+  <div class="logo"><span>MB</span> MSN <b>BROCK</b></div>
+  <div class="top-user"><span id="topUser"></span><button id="logoutBtn" class="outline">Logout</button></div>
+</header>
+<div class="shell">
+<aside class="sidebar">
+  <button class="nav active" data-page="dashboard">▣ Dashboard</button>
+  <button class="nav" data-page="markets">⌁ Markets</button>
+  <button class="nav" data-page="watchlist">★ Watchlist</button>
+  <button class="nav" data-page="portfolio">◈ Portfolio</button>
+  <button class="nav" data-page="trade">⇄ Trade Simulation</button>
+  <button class="nav" data-page="kyc">▤ KYC & Documents</button>
+  <button class="nav" data-page="withdrawal">↗ Withdrawal</button>
+  <button class="nav" data-page="statement">▤ Statement</button>
+  <button class="nav" data-page="news">◉ Market News</button>
+  <div class="sim-card"><strong>SIMULATION</strong><br>All balances and trades are fictional demo data.</div>
+</aside>
+
+<main>
+<section id="dashboard" class="page">
+  <div class="heading"><div><h1>Account Dashboard</h1><p class="muted">Welcome back, <span id="welcome"></span></p></div><span class="badge green">MARKET OPEN — SIMULATED</span></div>
+  <div class="cards">
+    <div class="card"><small>ACCOUNT BALANCE</small><h2 id="balance"></h2><span class="muted">Demo balance</span></div>
+    <div class="card"><small>PORTFOLIO VALUE</small><h2 id="dashPortfolio"></h2><span id="dashPnl" class="up"></span></div>
+    <div class="card"><small>WITHDRAWAL LIMIT</small><h2 id="dashLimit"></h2><span class="muted">Configured demo limit</span></div>
+    <div class="card"><small>KYC STATUS</small><h2 id="kycDash">Under Review</h2><span class="muted">Demo workflow</span></div>
+  </div>
+  <div class="grid">
+    <div class="panel"><div class="panel-head"><h2>Market Trend</h2><span class="badge">SIMULATED</span></div><canvas id="marketChart"></canvas></div>
+    <div class="panel"><div class="panel-head"><h2>Market Snapshot</h2></div><div id="snapshot"></div></div>
+  </div>
+  <div class="panel"><div class="panel-head"><h2>Quick Actions</h2></div><div class="quick">
+    <button data-goto="portfolio">View Portfolio</button><button data-goto="trade">Buy / Sell Simulation</button><button data-goto="withdrawal">Withdrawal</button><button data-goto="statement">Statement</button>
+  </div></div>
+</section>
+
+<section id="markets" class="page hidden">
+ <div class="heading"><div><h1>Markets</h1><p class="muted">Live-style simulated market data</p></div><input id="search" class="search" placeholder="Search stocks..."></div>
+ <div class="index-row"><div class="index"><span>NIFTY 50</span><b id="nifty">24,612.35</b><em class="up">+0.62%</em></div><div class="index"><span>SENSEX</span><b>80,821.20</b><em class="up">+0.48%</em></div><div class="index"><span>BANK NIFTY</span><b>55,218.40</b><em class="down">-0.18%</em></div></div>
+ <div class="panel"><div class="table-wrap"><table><thead><tr><th>Symbol</th><th>Company</th><th>Price</th><th>Change</th><th>Watch</th><th>Action</th></tr></thead><tbody id="marketRows"></tbody></table></div></div>
+</section>
+
+<section id="watchlist" class="page hidden"><div class="heading"><div><h1>★ Watchlist</h1><p class="muted">Stocks you are following</p></div></div><div class="panel" id="watchRows"></div></section>
+
+<section id="portfolio" class="page hidden">
+ <div class="heading"><div><h1>Portfolio</h1><p class="muted">Paper-trading holdings</p></div></div>
+ <div class="cards three"><div class="card"><small>VALUE</small><h2 id="portValue"></h2></div><div class="card"><small>AVAILABLE CASH</small><h2 id="portCash"></h2></div><div class="card"><small>TOTAL P&L</small><h2 id="portPnl"></h2></div></div>
+ <div class="panel"><div class="table-wrap"><table><thead><tr><th>Symbol</th><th>Qty</th><th>Average</th><th>Current</th><th>Value</th><th>P&L</th></tr></thead><tbody id="portfolioRows"></tbody></table></div></div>
+</section>
+
+<section id="trade" class="page hidden">
+ <div class="heading"><div><h1>Trade Simulation</h1><p class="muted">Buy and sell using fictional funds only</p></div></div>
+ <div class="panel trade-box"><label>Stock<select id="tradeStock"></select></label><div class="trade-tabs"><button class="selected" id="buyTab">BUY</button><button id="sellTab">SELL</button></div><label>Quantity<input id="tradeQty" type="number" min="1" value="1"></label><div class="trade-summary"><span>Estimated value</span><b id="estimate">₹0</b></div><button class="primary" id="tradeBtn">Place simulated order</button><p id="tradeMessage"></p></div>
+</section>
+
+<section id="kyc" class="page hidden">
+ <div class="heading"><div><h1>KYC & Documents</h1><p class="muted">Document workflow — simulation only</p></div><span class="badge amber">UNDER REVIEW</span></div>
+ <div class="steps"><div class="done">1. Personal</div><div class="done">2. Identity</div><div class="active">3. Documents</div><div>4. Review</div></div>
+ <div class="panel form-grid">
+  <label>Full name<input placeholder="Client full name"></label><label>Date of birth<input type="date"></label>
+  <label>PAN<input placeholder="PAN"></label><label>Identity document<input placeholder="Aadhaar / other accepted ID"></label>
+  <label>Address proof<input type="file"></label><label>Bank proof<input type="file"></label>
+  <label>Mobile<input placeholder="+91"></label><label>Email<input type="email"></label>
+  <div class="full"><button class="primary" onclick="alert('Demo KYC submission recorded locally. No document is uploaded or verified.')">Submit KYC for review</button></div>
+ </div>
+ <div class="notice">Do not upload real Aadhaar, PAN, bank documents, or other sensitive identity information to this static demo. A production system requires secure backend storage and an authorized KYC process.</div>
+</section>
+
+<section id="withdrawal" class="page hidden">
+ <div class="heading"><div><h1>Withdrawal</h1><p class="muted">Demo withdrawal workflow</p></div></div>
+ <div class="cards three"><div class="card"><small>ACCOUNT BALANCE</small><h2 id="wdBalance"></h2></div><div class="card"><small>WITHDRAWAL LIMIT</small><h2 id="wdLimit"></h2></div><div class="card"><small>STATUS</small><h2 class="amber-text">PENDING</h2></div></div>
+ <div class="panel form-grid"><label>Amount (INR)<input id="wdAmount" type="number" min="0" placeholder="Enter amount"></label><label>Method<select><option>Bank account — demo</option></select></label><div class="full"><button class="primary" id="wdBtn">Submit withdrawal request</button></div><p id="wdMsg" class="full"></p></div>
+ <div class="panel"><div class="panel-head"><h2>Withdrawal History</h2></div><div class="table-wrap"><table><thead><tr><th>Date</th><th>Amount</th><th>Status</th><th>Reference</th></tr></thead><tbody id="wdHistory"></tbody></table></div></div>
+</section>
+
+<section id="statement" class="page hidden">
+ <div class="heading"><div><h1>Statement</h1><p class="muted">Account and simulated transaction history</p></div><button class="outline" onclick="window.print()">Print / Save PDF</button></div>
+ <div class="panel statement-head"><b>MSN BROCK</b><span>Client: <strong id="statementClient"></strong></span><span>Client ID: BRCLT-45871293</span></div>
+ <div class="panel"><div class="table-wrap"><table><thead><tr><th>Date</th><th>Description</th><th>Credit</th><th>Debit</th><th>Balance</th><th>Status</th></tr></thead><tbody id="statementRows"></tbody></table></div></div>
+</section>
+
+<section id="news" class="page hidden"><div class="heading"><div><h1>Market News</h1><p class="muted">Demo headlines</p></div></div><div class="news-grid"><article><span>MARKET</span><h2>Equities remain active in simulated session</h2><p>Example content for the MSN Brock interface. Not live news.</p></article><article><span>TECH</span><h2>Technology stocks lead simulated movers</h2><p>Prices and commentary are fictional for demonstration.</p></article><article><span>ENERGY</span><h2>Energy sector stays in focus</h2><p>This dashboard is not connected to an exchange.</p></article></div></section>
+</main>
+</div>
+</div>
+<script src="app.js"></script>
+</body>
+</html>
