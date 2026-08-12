@@ -1,6 +1,6 @@
 # MSN Brock — GitHub-ready simulation
 
-This is a static front-end demonstration of a professional market dashboard.
+ market dashboard.
 
 Included:
 - Login without OTP
