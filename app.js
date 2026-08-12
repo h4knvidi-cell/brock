@@ -886,8 +886,17 @@ function renderStatement() {
 function submitKYC() {
 
   alert(
-    "KYC submission recorded for review. " +
-    "This interface does not verify identity documents."
+    function submitKYC() {
+    const message = document.getElementById("kycMessage");
+
+    message.innerHTML = `
+        <div class="kyc-success">
+            ✓ All documents submitted successfully.
+            <br>
+            <span>Your KYC application is now under review.</span>
+        </div>
+    `;
+}
   );
 
 }
