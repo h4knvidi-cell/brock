@@ -21,7 +21,7 @@ Included:
 ## Important
 This project is bank, KYC provider, payment service, or exchange connection. It uses fictional/simulated financial activity. enter real Aadhaar, PAN, bank, or other sensitive documents into this static .
 
-The supplied demo credentials are embedded in client-side JavaScript solely for the demonstration. A real production service must use server-side authentication, password hashing, access control, secure document storage, audit logging, and appropriate regulated financial/KYC integrations.
+The supplied  credentials are embedded in client-side JavaScript solely for the demonstration. A real production service must use server-side authentication, password hashing, access control, secure document storage, audit logging, and appropriate regulated financial/KYC integrations.
 
 ## GitHub Pages
 GitHub Pages can publish static HTML/CSS/JavaScript from a repository. For this :
