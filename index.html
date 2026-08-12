@@ -36,17 +36,17 @@
   <button class="nav" data-page="withdrawal">↗ Withdrawal</button>
   <button class="nav" data-page="statement">▤ Statement</button>
   <button class="nav" data-page="news">◉ Market News</button>
-  <div class="sim-card"><strong>SIMULATION</strong><br>All balances and trades are fictional demo data.</div>
+  <div class="sim-card"><strong>SIMULATION</strong><br>All balances and trades are fictional  data.</div>
 </aside>
 
 <main>
 <section id="dashboard" class="page">
   <div class="heading"><div><h1>Account Dashboard</h1><p class="muted">Welcome back, <span id="welcome"></span></p></div><span class="badge green">MARKET OPEN — SIMULATED</span></div>
   <div class="cards">
-    <div class="card"><small>ACCOUNT BALANCE</small><h2 id="balance"></h2><span class="muted">Demo balance</span></div>
+    <div class="card"><small>ACCOUNT BALANCE</small><h2 id="balance"></h2><span class="muted"> balance</span></div>
     <div class="card"><small>PORTFOLIO VALUE</small><h2 id="dashPortfolio"></h2><span id="dashPnl" class="up"></span></div>
     <div class="card"><small>WITHDRAWAL LIMIT</small><h2 id="dashLimit"></h2><span class="muted">Configured demo limit</span></div>
-    <div class="card"><small>KYC STATUS</small><h2 id="kycDash">Under Review</h2><span class="muted">Demo workflow</span></div>
+    <div class="card"><small>KYC STATUS</small><h2 id="kycDash">Under Review</h2><span class="muted">  workflow</span></div>
   </div>
   <div class="grid">
     <div class="panel"><div class="panel-head"><h2>Market Trend</h2><span class="badge">SIMULATED</span></div><canvas id="marketChart"></canvas></div>
@@ -84,13 +84,13 @@
   <label>PAN<input placeholder="PAN"></label><label>Identity document<input placeholder="Aadhaar / other accepted ID"></label>
   <label>Address proof<input type="file"></label><label>Bank proof<input type="file"></label>
   <label>Mobile<input placeholder="+91"></label><label>Email<input type="email"></label>
-  <div class="full"><button class="primary" onclick="alert('Demo KYC submission recorded locally. No document is uploaded or verified.')">Submit KYC for review</button></div>
+  <div class="full"><button class="primary" onclick="alert(' KYC submission recorded locally. No document is uploaded or verified.')">Submit KYC for review</button></div>
  </div>
- <div class="notice">Do not upload real Aadhaar, PAN, bank documents, or other sensitive identity information to this static demo. A production system requires secure backend storage and an authorized KYC process.</div>
+ <div class="notice"> upload Aadhaar, PAN, bank documents, or other sensitive identity information. A production system requires secure backend storage and an authorized KYC process.</div>
 </section>
 
 <section id="withdrawal" class="page hidden">
- <div class="heading"><div><h1>Withdrawal</h1><p class="muted">Demo withdrawal workflow</p></div></div>
+ <div class="heading"><div><h1>Withdrawal</h1><p class="muted"> withdrawal workflow</p></div></div>
  <div class="cards three"><div class="card"><small>ACCOUNT BALANCE</small><h2 id="wdBalance"></h2></div><div class="card"><small>WITHDRAWAL LIMIT</small><h2 id="wdLimit"></h2></div><div class="card"><small>STATUS</small><h2 class="amber-text">PENDING</h2></div></div>
  <div class="panel form-grid"><label>Amount (INR)<input id="wdAmount" type="number" min="0" placeholder="Enter amount"></label><label>Method<select><option>Bank account — demo</option></select></label><div class="full"><button class="primary" id="wdBtn">Submit withdrawal request</button></div><p id="wdMsg" class="full"></p></div>
  <div class="panel"><div class="panel-head"><h2>Withdrawal History</h2></div><div class="table-wrap"><table><thead><tr><th>Date</th><th>Amount</th><th>Status</th><th>Reference</th></tr></thead><tbody id="wdHistory"></tbody></table></div></div>
