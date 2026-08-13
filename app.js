@@ -1,55 +1,151 @@
-const USERS=[
-{u:"shreyas",p:"SHR129",balance:2000000000,limit:8000,withdrawal:8000},
-{u:"zain",p:"zai129",balance:9000000000,limit:5000,withdrawal:5000},
-{u:"rana",p:"ran129",balance:3650000000,limit:6000,withdrawal:6000},
-{u:"gani",p:"gan129",balance:7800000,limit:4000,withdrawal:4000},
-{u:"dhanush",p:"dha129",balance:3500000,limit:0,withdrawal:0},
-{u:"nadeem",p:"nad129",balance:7500000,limit:2500,withdrawal:2500}];
-const STOCKS=[
-["RELIANCE","Reliance Industries",2941.25,1.18],["TCS","Tata Consultancy Services",4178.40,-0.42],
-["INFY","Infosys",1810.65,.74],["HDFCBANK","HDFC Bank",1972.10,.31],["ICICIBANK","ICICI Bank",1427.80,1.02],
-["SBIN","State Bank of India",926.55,-.63],["ITC","ITC Ltd",493.20,.52],["BHARTIARTL","Bharti Airtel",1888.30,1.41],
-["LT","Larsen & Toubro",3892,.16],["MARUTI","Maruti Suzuki",12740,-.28]];
-let user=null,prices=STOCKS.map(x=>x[2]),watch=new Set(["RELIANCE","INFY"]),cash=0,holdings={},tradeSide="BUY",transactions=[],withdrawals=[];
-const money=n=>"₹"+Number(n).toLocaleString("en-IN",{maximumFractionDigits:2});
-const $=id=>document.getElementById(id);
+const CLIENT_ID="BRCLT-45871293";
 
-function login(){const u=$("username").value.trim().toLowerCase(),p=$("password").value,c=$("clientId").value.trim();user=USERS.find(x=>x.u===u&&x.p===p&&c==="BRCLT-45871293");if(!user){$("loginError").textContent="Invalid login details.";return}cash=user.balance;sessionStorage.setItem("msnUser",u);$("loginView").classList.add("hidden");$("appView").classList.remove("hidden");$("topUser").textContent="● "+u;$("welcome").textContent=u;renderAll()}
-function logout(){sessionStorage.clear();location.reload()}
-$("loginBtn").onclick=login;$("password").addEventListener("keydown",e=>{if(e.key==="Enter")login()});$("logoutBtn").onclick=logout;
+const USERS=[
+ {username:"shreyas",password:"SHR129",balance:2000000000,withdrawalLimit:8000,pendingPayment:8000,pendingWithdrawal:8000,monthlyPayable:125000},
+ {username:"zain",password:"zai129",balance:9000000000,withdrawalLimit:5000,pendingPayment:5000,pendingWithdrawal:5000,monthlyPayable:125000},
+ {username:"rana",password:"ran129",balance:3650000000,withdrawalLimit:6000,pendingPayment:6000,pendingWithdrawal:6000,monthlyPayable:125000},
+ {username:"gani",password:"gan129",balance:7800000,withdrawalLimit:4000,pendingPayment:4000,pendingWithdrawal:4000,monthlyPayable:125000},
+ {username:"dhanush",password:"dha129",balance:3500000,withdrawalLimit:0,pendingPayment:2000,pendingWithdrawal:2000,monthlyPayable:125000},
+ {username:"nadeem",password:"nad129",balance:7500000,withdrawalLimit:2500,pendingPayment:2500,pendingWithdrawal:2500,monthlyPayable:125000}
+];
+
+const STOCKS=[
+ ["RELIANCE","Reliance Industries",2941.25,1.18],["TCS","Tata Consultancy Services",4178.40,-0.42],
+ ["INFY","Infosys",1810.65,0.74],["HDFCBANK","HDFC Bank",1972.10,0.31],
+ ["ICICIBANK","ICICI Bank",1427.80,1.02],["SBIN","State Bank of India",926.55,-0.63],
+ ["ITC","ITC Limited",493.20,0.52],["BHARTIARTL","Bharti Airtel",1888.30,1.41],
+ ["LT","Larsen & Toubro",3892,0.16],["MARUTI","Maruti Suzuki",12740,-0.28]
+];
+
+let prices=STOCKS.map(s=>s[2]),currentUser=null,cashBalance=0;
+let watchlist=new Set(["RELIANCE","INFY"]),holdings={},transactions=[],withdrawalHistory=[],tradeSide="BUY";
+const $=id=>document.getElementById(id);
+const money=n=>"₹"+Number(n).toLocaleString("en-IN",{maximumFractionDigits:2});
+const today=()=>new Date().toLocaleDateString("en-IN");
+
+function login(){
+ const u=$("username").value.trim().toLowerCase(),c=$("clientId").value.trim(),p=$("password").value;
+ const a=USERS.find(x=>x.username===u&&x.password===p&&c===CLIENT_ID);
+ if(!a){$("loginError").textContent="Invalid username, Client ID, or password.";return}
+ currentUser=a;cashBalance=a.balance;sessionStorage.setItem("msn_brock_user",a.username);
+ $("loginView").classList.add("hidden");$("appView").classList.remove("hidden");
+ $("topUser").textContent="● "+a.username;$("welcome").textContent=a.username;renderAll();
+}
+$("loginBtn").onclick=login;
+$("password").addEventListener("keydown",e=>{if(e.key==="Enter")login()});
+$("logoutBtn").onclick=()=>{sessionStorage.removeItem("msn_brock_user");location.reload()};
+
+function calculatePortfolio(){
+ let value=cashBalance,pnl=0;
+ Object.entries(holdings).forEach(([s,h])=>{const i=STOCKS.findIndex(x=>x[0]===s);value+=h.qty*prices[i];pnl+=(prices[i]-h.averagePrice)*h.qty});
+ return {value,pnl};
+}
+
+function renderDashboard(){
+ const p=calculatePortfolio();
+ $("balance").textContent=money(currentUser.balance);$("dashPortfolio").textContent=money(p.value);
+ $("dashPnl").textContent=(p.pnl>=0?"+":"")+money(p.pnl)+" simulated P&L";$("dashPnl").className=p.pnl>=0?"up":"down";
+ $("dashPending").textContent=money(currentUser.pendingPayment);$("monthlyPayable").textContent=money(currentUser.monthlyPayable);
+ $("dashLimit").textContent=money(currentUser.withdrawalLimit);$("wdBalance").textContent=money(currentUser.balance);$("wdLimit").textContent=money(currentUser.withdrawalLimit);
+}
 
 function renderPendingPayment(){
- const amount=currentUser.pendingPayment ?? currentUser.pendingWithdrawal ?? 0;
- if(document.getElementById("pendingClient")) document.getElementById("pendingClient").textContent=currentUser.username;
- if(document.getElementById("pendingClient2")) document.getElementById("pendingClient2").textContent=currentUser.username;
- if(document.getElementById("pendingAmount")) document.getElementById("pendingAmount").textContent=money(amount);
- if(document.getElementById("pendingAmount2")) document.getElementById("pendingAmount2").textContent=money(amount);
- if(document.getElementById("dashPending")) document.getElementById("dashPending").textContent=money(amount);
+ $("pendingClient").textContent=currentUser.username;$("pendingClient2").textContent=currentUser.username;
+ $("pendingAmount").textContent=money(currentUser.pendingPayment);$("pendingAmount2").textContent=money(currentUser.pendingPayment);
+ $("pendingMonthly").textContent=money(currentUser.monthlyPayable);$("pendingMonthly2").textContent=money(currentUser.monthlyPayable);
 }
 
-function renderMarkets(){const q=($("search")?.value||"").toUpperCase();$("marketRows").innerHTML=STOCKS.map((s,i)=>({s,i})).filter(x=>x.s[0].includes(q)||x.s[1].toUpperCase().includes(q)).map(x=>`<tr><td class="symbol">${x.s[0]}</td><td>${x.s[1]}</td><td>${money(prices[x.i])}</td><td class="${x.s[3]>=0?"up":"down"}">${x.s[3]>=0?"+":""}${x.s[3].toFixed(2)}%</td><td><button class="star ${watch.has(x.s[0])?"on":""}" onclick="toggleWatch('${x.s[0]}')">★</button></td><td><button class="trade-btn" onclick="goTrade('${x.s[0]}')">Trade</button></td></tr>`).join("")||"<tr><td colspan='6'>No stocks found.</td></tr>"}
-function toggleWatch(s){watch.has(s)?watch.delete(s):watch.add(s);renderAll()}
-function renderWatch(){$("watchRows").innerHTML=[...watch].map(sym=>{const i=STOCKS.findIndex(x=>x[0]===sym);return `<div class="mover"><div><b>${sym}</b><div class="muted">${STOCKS[i][1]}</div></div><div>${money(prices[i])}<br><span class="${STOCKS[i][3]>=0?"up":"down"}">${STOCKS[i][3]>=0?"+":""}${STOCKS[i][3].toFixed(2)}%</span></div></div>`}).join("")||"<p class='muted'>Watchlist is empty.</p>"}
-function portfolio(){let value=cash,pnl=0;Object.entries(holdings).forEach(([sym,h])=>{let i=STOCKS.findIndex(x=>x[0]===sym),v=h.qty*prices[i];value+=v;pnl+=(prices[i]-h.avg)*h.qty});return{value,pnl}}
-function renderPortfolio(){const p=portfolio();$("portValue").textContent=money(p.value);$("portCash").textContent=money(cash);$("portPnl").textContent=money(p.pnl);$("portPnl").className=p.pnl>=0?"up":"down";$("dashPortfolio").textContent=money(p.value);$("dashPnl").textContent=(p.pnl>=0?"+":"")+money(p.pnl)+" simulated P&L";$("balance").textContent=money(user.balance);$("dashLimit").textContent=money(user.limit);$("wdBalance").textContent=money(user.balance);$("wdLimit").textContent=money(user.limit);$("portfolioRows").innerHTML=Object.entries(holdings).map(([sym,h])=>{let i=STOCKS.findIndex(x=>x[0]===sym),v=h.qty*prices[i],pl=(prices[i]-h.avg)*h.qty;return `<tr><td class="symbol">${sym}</td><td>${h.qty}</td><td>${money(h.avg)}</td><td>${money(prices[i])}</td><td>${money(v)}</td><td class="${pl>=0?"up":"down"}">${money(pl)}</td></tr>`}).join("")||"<tr><td colspan='6' class='muted'>No simulated holdings.</td></tr>"}
-function renderSnapshot(){$("snapshot").innerHTML=STOCKS.slice(0,5).map((s,i)=>`<div class="snapshot"><span><b>${s[0]}</b><br><small class="muted">${money(prices[i])}</small></span><span class="${s[3]>=0?"up":"down"}">${s[3]>=0?"+":""}${s[3].toFixed(2)}%</span></div>`).join("")}
-function drawChart(){const c=$("marketChart");if(!c)return;const r=c.getBoundingClientRect(),d=devicePixelRatio||1,w=r.width,h=270;c.width=w*d;c.height=h*d;const x=c.getContext("2d");x.scale(d,d);x.clearRect(0,0,w,h);let pts=Array.from({length:55},(_,i)=>h*.52-Math.sin(i/4)*h*.15-i*.8+(Math.random()-.5)*18);x.strokeStyle="#31df7b";x.lineWidth=2;x.beginPath();pts.forEach((y,i)=>{let xx=8+i*(w-16)/(pts.length-1);i?x.lineTo(xx,y):x.moveTo(xx,y)});x.stroke()}
-function goTrade(sym){showPage("trade");$("tradeStock").value=sym;updateEstimate()}
-function updateEstimate(){const i=STOCKS.findIndex(x=>x[0]===$("tradeStock").value),q=Math.max(0,Number($("tradeQty").value)||0);$("estimate").textContent=money(prices[i]*q)}
-$("search").oninput=renderMarkets;$("tradeQty").oninput=updateEstimate;$("tradeStock").onchange=updateEstimate;$("buyTab").onclick=()=>{tradeSide="BUY";$("buyTab").classList.add("selected");$("sellTab").classList.remove("selected")};$("sellTab").onclick=()=>{tradeSide="SELL";$("sellTab").classList.add("selected");$("buyTab").classList.remove("selected")};
-function executeTrade(){const sym=$("tradeStock").value,i=STOCKS.findIndex(x=>x[0]===sym),q=Math.floor(Number($("tradeQty").value)),price=prices[i];if(q<1)return;if(!holdings[sym])holdings[sym]={qty:0,avg:0};let h=holdings[sym];if(tradeSide==="BUY"){let cost=q*price;if(cost>cash){$("tradeMessage").textContent="Insufficient simulated cash.";return}h.avg=(h.avg*h.qty+cost)/(h.qty+q);h.qty+=q;cash-=cost;transactions.push(["Today","Simulated BUY "+sym,"—",money(cost),money(cash)])}else{if(q>h.qty){$("tradeMessage").textContent="Not enough simulated shares.";return}cash+=q*price;h.qty-=q;if(!h.qty)delete holdings[sym];transactions.push(["Today","Simulated SELL "+sym,money(q*price),"—",money(cash)])}$("tradeMessage").textContent="Simulated order completed.";renderAll()}
-$("tradeBtn").onclick=executeTrade;
-function renderWithdrawals(){$("wdHistory").innerHTML=withdrawals.length?withdrawals.map(w=>`<tr><td>${w.date}</td><td>${money(w.amount)}</td><td class="amber-text">${w.status}</td><td>${w.ref}</td></tr>`).join(""):`<tr><td>12-Aug-2026</td><td>${money(user.withdrawal)}</td><td class="amber-text">PENDING</td><td>MB-PAPER TRADING-${user.u.toUpperCase()}</td></tr>`}
-$("wdBtn").onclick=()=>{const a=Number($("wdAmount").value);if(user.limit===0){$("wdMsg").textContent="Withdrawals are disabled for this paper-trading account.";return}if(!a||a<1||a>user.limit){$("wdMsg").textContent="Amount exceeds the configured paper-trading withdrawal limit.";return}withdrawals.push({date:new Date().toLocaleDateString("en-IN"),amount:a,status:"PENDING",ref:"MB-PAPER TRADING-"+Date.now().toString().slice(-6)});$("wdMsg").textContent="Withdrawal request recorded as PENDING (simulation).";renderWithdrawals()};
-function renderStatement(){$("statementClient").textContent=user.u;const rows=[["12-Aug-2026","Opening simulated balance","—","—",money(user.balance),"PAPER TRADING"],...transactions];$("statementRows").innerHTML=rows.map(r=>`<tr><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td><td>${r[3]}</td><td>${r[4]}</td><td>${r[5]}</td></tr>`).join("")}
-function supportMessage(type){
- const box=document.getElementById("supportMessage");
- if(box) box.innerHTML=`<div class="support-success"><strong>${type}</strong><p>Your support request has been opened.</p><span>Please provide the relevant details.</span></div>`;
+function renderMarkets(){
+ const q=($("search")?.value||"").toUpperCase();
+ $("marketRows").innerHTML=STOCKS.map((s,i)=>({s,i})).filter(x=>x.s[0].includes(q)||x.s[1].toUpperCase().includes(q)).map(x=>`
+ <tr><td class="symbol">${x.s[0]}</td><td>${x.s[1]}</td><td>${money(prices[x.i])}</td>
+ <td class="${x.s[3]>=0?"up":"down"}">${x.s[3]>=0?"+":""}${x.s[3].toFixed(2)}%</td>
+ <td><button class="star ${watchlist.has(x.s[0])?"on":""}" onclick="toggleWatch('${x.s[0]}')">★</button></td>
+ <td><button class="trade-btn" onclick="goTrade('${x.s[0]}')">Trade</button></td></tr>`).join("");
+}
+$("search").oninput=renderMarkets;
+
+function toggleWatch(s){watchlist.has(s)?watchlist.delete(s):watchlist.add(s);renderAll()}
+function renderWatchlist(){
+ $("watchRows").innerHTML=[...watchlist].map(s=>{const i=STOCKS.findIndex(x=>x[0]===s);return `<div class="mover"><div><b>${s}</b><div class="muted">${STOCKS[i][1]}</div></div><div>${money(prices[i])}<br><span class="${STOCKS[i][3]>=0?"up":"down"}">${STOCKS[i][3]>=0?"+":""}${STOCKS[i][3].toFixed(2)}%</span></div></div>`}).join("")||"<p class='muted'>Watchlist is empty.</p>";
 }
 
-function showPage(id){document.querySelectorAll(".page").forEach(x=>x.classList.add("hidden"));$(id).classList.remove("hidden");document.querySelectorAll(".nav").forEach(x=>x.classList.toggle("active",x.dataset.page===id));if(id==="dashboard")drawChart()}
-document.querySelectorAll(".nav").forEach(b=>b.onclick=()=>showPage(b.dataset.page));document.querySelectorAll("[data-goto]").forEach(b=>b.onclick=()=>showPage(b.dataset.goto));
-function renderAll(){renderMarkets();renderWatch();renderPortfolio();renderSnapshot();renderWithdrawals();renderStatement();$("tradeStock").innerHTML=STOCKS.map(s=>`<option>${s[0]}</option>`).join("");updateEstimate();drawChart()}
-setInterval(()=>{prices=prices.map(p=>p*(1+(Math.random()-.5)*.001));STOCKS.forEach(s=>s[3]=Math.max(-5,Math.min(5,s[3]+(Math.random()-.5)*.08)));if(!document.getElementById("appView").classList.contains("hidden"))renderAll()},5000);
+function renderPortfolio(){
+ const p=calculatePortfolio();$("portValue").textContent=money(p.value);$("portCash").textContent=money(cashBalance);$("portPnl").textContent=money(p.pnl);$("portPnl").className=p.pnl>=0?"up":"down";
+ $("portfolioRows").innerHTML=Object.entries(holdings).map(([s,h])=>{const i=STOCKS.findIndex(x=>x[0]===s),v=prices[i],val=h.qty*v,pnl=(v-h.averagePrice)*h.qty;return `<tr><td class="symbol">${s}</td><td>${h.qty}</td><td>${money(h.averagePrice)}</td><td>${money(v)}</td><td>${money(val)}</td><td class="${pnl>=0?"up":"down"}">${money(pnl)}</td></tr>`}).join("")||"<tr><td colspan='6' class='muted'>No simulated holdings.</td></tr>";
+}
+
+function renderSnapshot(){
+ $("snapshot").innerHTML=STOCKS.slice(0,5).map((s,i)=>`<div class="snapshot"><span><b>${s[0]}</b><br><small class="muted">${money(prices[i])}</small></span><span class="${s[3]>=0?"up":"down"}">${s[3]>=0?"+":""}${s[3].toFixed(2)}%</span></div>`).join("");
+}
+
+function setupTradeStocks(){$("tradeStock").innerHTML=STOCKS.map(s=>`<option value="${s[0]}">${s[0]}</option>`).join("");updateTradeEstimate()}
+function updateTradeEstimate(){const s=$("tradeStock").value,q=Math.floor(Number($("tradeQty").value)||0),i=STOCKS.findIndex(x=>x[0]===s);if(i>=0)$("estimate").textContent=money(prices[i]*q)}
+$("tradeQty").oninput=updateTradeEstimate;$("tradeStock").onchange=updateTradeEstimate;
+function goTrade(s){showPage("trade");$("tradeStock").value=s;updateTradeEstimate()}
+$("buyTab").onclick=()=>{tradeSide="BUY";$("buyTab").classList.add("selected");$("sellTab").classList.remove("selected")};
+$("sellTab").onclick=()=>{tradeSide="SELL";$("sellTab").classList.add("selected");$("buyTab").classList.remove("selected")};
+
+$("tradeBtn").onclick=()=>{
+ const s=$("tradeStock").value,q=Math.floor(Number($("tradeQty").value)),i=STOCKS.findIndex(x=>x[0]===s),price=prices[i];
+ if(q<1){$("tradeMessage").textContent="Enter a valid quantity.";return}
+ if(!holdings[s])holdings[s]={qty:0,averagePrice:0};const h=holdings[s];
+ if(tradeSide==="BUY"){
+  const cost=q*price;if(cost>cashBalance){$("tradeMessage").textContent="Insufficient paper-trading cash.";return}
+  h.averagePrice=(h.averagePrice*h.qty+cost)/(h.qty+q);h.qty+=q;cashBalance-=cost;
+  transactions.push({date:today(),description:"Paper BUY — "+s,credit:0,debit:cost,balance:cashBalance,status:"PAPER"});
+ }else{
+  if(q>h.qty){$("tradeMessage").textContent="Insufficient paper-trading shares.";return}
+  const proceeds=q*price;h.qty-=q;cashBalance+=proceeds;
+  transactions.push({date:today(),description:"Paper SELL — "+s,credit:proceeds,debit:0,balance:cashBalance,status:"PAPER"});if(h.qty===0)delete holdings[s];
+ }
+ $("tradeMessage").textContent="Order completed in paper trading.";renderAll();
+};
+
+function renderWithdrawals(){
+ let rows=[];
+ if(currentUser.pendingWithdrawal>0)rows.push({date:today(),amount:currentUser.pendingWithdrawal,status:"PENDING",reference:"MB-PENDING-"+currentUser.username.toUpperCase()});
+ rows=rows.concat(withdrawalHistory);
+ $("wdHistory").innerHTML=rows.map(r=>`<tr><td>${r.date}</td><td>${money(r.amount)}</td><td class="amber-text">${r.status}</td><td>${r.reference}</td></tr>`).join("")||"<tr><td colspan='4' class='muted'>No withdrawal records.</td></tr>";
+}
+
+$("wdBtn").onclick=()=>{
+ const amount=Number($("wdAmount").value);
+ if(currentUser.withdrawalLimit<=0){$("wdMsg").textContent="Withdrawal is currently unavailable for this account.";return}
+ if(!amount||amount<=0){$("wdMsg").textContent="Enter a valid withdrawal amount.";return}
+ if(amount>currentUser.withdrawalLimit){$("wdMsg").textContent="Amount exceeds the configured withdrawal limit.";return}
+ withdrawalHistory.push({date:today(),amount,status:"PENDING",reference:"MB-REQ-"+Date.now().toString().slice(-8)});
+ $("wdMsg").textContent="Withdrawal request submitted as PENDING.";$("wdAmount").value="";renderWithdrawals();
+};
+
+function renderStatement(){
+ $("statementClient").textContent=currentUser.username;
+ const rows=[{date:today(),description:"Opening paper-trading balance",credit:0,debit:0,balance:currentUser.balance,status:"PAPER"},...transactions];
+ $("statementRows").innerHTML=rows.map(r=>`<tr><td>${r.date}</td><td>${r.description}</td><td>${r.credit?money(r.credit):"—"}</td><td>${r.debit?money(r.debit):"—"}</td><td>${money(r.balance)}</td><td>${r.status}</td></tr>`).join("");
+}
+
+function submitKYC(){$("kycMessage").innerHTML=`<div class="kyc-success">✓ All documents submitted successfully.<br><span>Your KYC application is now under review.</span></div>`}
+function supportMessage(type){$("supportMessage").innerHTML=`<div class="support-success"><strong>${type}</strong><p>Your support request has been opened.</p><span>Please provide the relevant details.</span></div>`}
+
+function showPage(id){document.querySelectorAll(".page").forEach(p=>p.classList.add("hidden"));$(id).classList.remove("hidden");document.querySelectorAll(".nav").forEach(b=>b.classList.toggle("active",b.dataset.page===id));if(id==="dashboard")setTimeout(drawChart,50)}
+document.querySelectorAll(".nav").forEach(b=>b.onclick=()=>showPage(b.dataset.page));
+document.querySelectorAll("[data-goto]").forEach(b=>b.onclick=()=>showPage(b.dataset.goto));
+
+function drawChart(){
+ const c=$("marketChart");if(!c)return;const r=c.getBoundingClientRect(),d=devicePixelRatio||1,w=r.width,h=270;c.width=w*d;c.height=h*d;
+ const ctx=c.getContext("2d");ctx.scale(d,d);ctx.clearRect(0,0,w,h);const pts=Array.from({length:60},(_,i)=>h*.52-Math.sin(i/4)*h*.15-i*.6+(Math.random()-.5)*14);
+ ctx.strokeStyle="#31df7b";ctx.lineWidth=2;ctx.beginPath();pts.forEach((y,i)=>{const x=8+i*(w-16)/(pts.length-1);i?ctx.lineTo(x,y):ctx.moveTo(x,y)});ctx.stroke();
+}
+
+function renderAll(){renderDashboard();renderPendingPayment();renderMarkets();renderWatchlist();renderPortfolio();renderSnapshot();renderWithdrawals();renderStatement();setupTradeStocks();setTimeout(drawChart,50)}
+
+setInterval(()=>{
+ if(!currentUser)return;
+ prices=prices.map(p=>p*(1+(Math.random()-.5)*.001));
+ STOCKS.forEach(s=>s[3]=Math.max(-5,Math.min(5,s[3]+(Math.random()-.5)*.08)));
+ renderAll();
+},5000);
 window.addEventListener("resize",drawChart);
-const saved=sessionStorage.getItem("msnUser");if(saved){$("username").value=saved;user=USERS.find(x=>x.u===saved);if(user){cash=user.balance;$("loginView").classList.add("hidden");$("appView").classList.remove("hidden");$("topUser").textContent="● "+user.u;$("welcome").textContent=user.u;renderAll()}}
+
+const saved=sessionStorage.getItem("msn_brock_user");
+if(saved){const a=USERS.find(u=>u.username===saved);if(a){currentUser=a;cashBalance=a.balance;$("loginView").classList.add("hidden");$("appView").classList.remove("hidden");$("topUser").textContent="● "+a.username;$("welcome").textContent=a.username;renderAll()}}
