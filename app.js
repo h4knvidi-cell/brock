@@ -35,11 +35,13 @@ const USERS = [
     pendingWithdrawal: 4000
   },
   {
-    username: "dhanush",
-    password: "dha129",
-    balance: 3500000,
-    withdrawalLimit: 0,
-    pendingWithdrawal: 0
+    {
+  username: "dhanush",
+  password: "dha129",
+  balance: 3500000,
+  withdrawalLimit: 0,
+  pending: 2000
+},
   },
   {
     username: "nadeem",
