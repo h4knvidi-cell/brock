@@ -1,34 +1,25 @@
-# MSN Brock — GitHub-ready simulation
-
-This is a static front-end paper-tradingnstration of a professional market dashboard.
-
-Included:
-- Login without OTP
-- Six paper-trading users
-- Account dashboard and configured paper-trading balances
-- Withdrawal section with configured paper-trading amounts/status
-- KYC & Documents workflow UI
-- Statement section
-- Stock search
-- Live-style simulated prices
-- Charts
-- Watchlist
-- Portfolio
-- Buy/sell paper-trading simulation
-- Market news
-- Responsive dark UI
-
-## Important
-This project is a paper-trading website, not a real brokerage, bank, KYC provider, payment service, or exchange connection. It uses fictional/simulated financial activity. Do not enter real Aadhaar, PAN, bank, or other sensitive documents into this static paper-trading.
-
-The supplied paper-trading credentials are embedded in client-side JavaScript solely for the paper-tradingnstration. A real production service must use server-side authentication, password hashing, access control, secure document storage, audit logging, and appropriate regulated financial/KYC integrations.
-
-## GitHub Pages
-GitHub Pages can publish static HTML/CSS/JavaScript from a repository. For this paper-trading:
-1. Create a new GitHub repository, e.g. `msn-brock-paper-trading`.
-2. Upload `index.html`, `style.css`, `app.js`, and `README.md`.
-3. Open repository Settings → Pages.
-4. Select a branch such as `main` and `/ (root)` as the source.
-5. Save. GitHub will provide the published site URL.
-
-Do not use GitHub Pages as the backend for a real financial service or to collect sensitive client information.
+MSN Brock — Easy GitHub Replace
+Replace exactly these three files in your GitHub repository:
+index.html
+style.css
+app.js
+Features:
+Login without OTP
+6 client accounts
+Individual account balances
+Individual pending payment and withdrawal amounts
+Monthly payable amount: ₹1,25,000 for each configured account
+Pending Payment section
+Withdrawal section
+Statement
+KYC & Documents
+KYC submission confirmation
+Portfolio
+Watchlist
+Stock search
+Live-style simulated prices/charts
+Buy/Sell paper trading
+Market News
+Support
+Responsive dark UI
+Important: this is a simulated/paper-trading interface and is not connected to a real bank, broker, exchange, payment processor, or KYC provider.
